@@ -4,34 +4,275 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YIELD Recommendation Engine</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        #queryForm {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        #queryInput {
+            flex: 1;
+            min-width: 250px;
+            padding: 18px 24px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #queryInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button[type="submit"] {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        #resultSection {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        #predictedType {
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        #resultsTable {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        #resultsTable thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #resultsTable th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #resultsTable tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        #resultsTable tbody tr:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: scale(1.01);
+        }
+
+        #resultsTable td {
+            padding: 16px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        #resultsTable tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .rating {
+            color: #ffa500;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .search-card, #resultSection {
+                padding: 25px;
+            }
+
+            #queryForm {
+                flex-direction: column;
+            }
+
+            button[type="submit"] {
+                width: 100%;
+            }
+
+            #resultsTable {
+                font-size: 12px;
+            }
+
+            #resultsTable th,
+            #resultsTable td {
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌾 YIELD ML Recommendation Engine</h1>
+        <div class="header">
+            <h1>🌾 YIELD ML Engine</h1>
+            <p>Smart Agricultural Labour Recommendations</p>
+        </div>
 
-        <form id="queryForm">
-            <input type="text" id="queryInput" placeholder="Enter your request (e.g. tractor operator for Yala season under 1000)" required>
-            <button type="submit">Recommend</button>
-        </form>
+        <div class="search-card">
+            <form id="queryForm">
+                <input type="text" id="queryInput" placeholder="e.g., i need someone to help improve soil nutrition" required>
+                <button type="submit">🔍 Find Workers</button>
+            </form>
+        </div>
 
         <div id="resultSection" style="display:none;">
             <h3 id="predictedType"></h3>
-            <table id="resultsTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Location</th>
-                        <th>Labour Type</th>
-                        <th>Season</th>
-                        <th>Crop Type</th>
-                        <th>Hourly Rate</th>
-                        <th>Rating</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Labour Type</th>
+                            <th>Season</th>
+                            <th>Crop Type</th>
+                            <th>Hourly Rate</th>
+                            <th>Rating</th>
+                            <th>Match Score</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -47,7 +288,7 @@
             const query = input.value.trim();
             if (!query) return;
 
-            predictedType.textContent = "Loading recommendations...";
+            predictedType.innerHTML = '<span class="loading">🔄 Loading recommendations...</span>';
             resultSection.style.display = "block";
             tableBody.innerHTML = "";
 
@@ -59,26 +300,25 @@
                 });
                 const data = await res.json();
 
-                predictedType.textContent = `Predicted Labour Type: ${data.predicted_labour_type}`;
+                predictedType.textContent = `✅ Predicted Labour Type: ${data.predicted_labour_type}`;
                 tableBody.innerHTML = "";
 
                 data.recommendations.forEach(rec => {
-                    const row = `
-                        <tr>
-                            <td>${rec.Name}</td>
-                            <td>${rec.Location}</td>
-                            <td>${rec.Labour_Type}</td>
-                            <td>${rec.Season}</td>
-                            <td>${rec.Crop_Type}</td>
-                            <td>${rec.Hourly_Rate}</td>
-                            <td>${rec.Rating}</td>
-                            <td>${rec.score.toFixed(3)}</td>
-                        </tr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${rec.Name}</strong></td>
+                        <td>${rec.Location}</td>
+                        <td>${rec.Labour_Type}</td>
+                        <td>${rec.Season}</td>
+                        <td>${rec.Crop_Type}</td>
+                        <td>Rs. ${rec.Hourly_Rate}/hr</td>
+                        <td class="rating">⭐ ${rec.Rating}</td>
+                        <td><span class="score-badge">${rec.score.toFixed(3)}</span></td>
                     `;
-                    tableBody.insertAdjacentHTML('beforeend', row);
+                    tableBody.appendChild(row);
                 });
             } catch (err) {
-                predictedType.textContent = "❌ Error fetching results. Check backend logs.";
+                predictedType.textContent = "❌ Error fetching results. Please check your connection and try again.";
                 console.error(err);
             }
         });
