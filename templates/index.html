@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YIELD Recommendation Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 YIELD ML Recommendation Engine</h1>
+
+        <form id="queryForm">
+            <input type="text" id="queryInput" placeholder="Enter your request (e.g. tractor operator for Yala season under 1000)" required>
+            <button type="submit">Recommend</button>
+        </form>
+
+        <div id="resultSection" style="display:none;">
+            <h3 id="predictedType"></h3>
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Labour Type</th>
+                        <th>Season</th>
+                        <th>Crop Type</th>
+                        <th>Hourly Rate</th>
+                        <th>Rating</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('queryForm');
+        const input = document.getElementById('queryInput');
+        const resultSection = document.getElementById('resultSection');
+        const predictedType = document.getElementById('predictedType');
+        const tableBody = document.querySelector('#resultsTable tbody');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            predictedType.textContent = "Loading recommendations...";
+            resultSection.style.display = "block";
+            tableBody.innerHTML = "";
+
+            try {
+                const res = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ query: query, top_k: 5 })
+                });
+                const data = await res.json();
+
+                predictedType.textContent = `Predicted Labour Type: ${data.predicted_labour_type}`;
+                tableBody.innerHTML = "";
+
+                data.recommendations.forEach(rec => {
+                    const row = `
+                        <tr>
+                            <td>${rec.Name}</td>
+                            <td>${rec.Location}</td>
+                            <td>${rec.Labour_Type}</td>
+                            <td>${rec.Season}</td>
+                            <td>${rec.Crop_Type}</td>
+                            <td>${rec.Hourly_Rate}</td>
+                            <td>${rec.Rating}</td>
+                            <td>${rec.score.toFixed(3)}</td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (err) {
+                predictedType.textContent = "❌ Error fetching results. Check backend logs.";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
