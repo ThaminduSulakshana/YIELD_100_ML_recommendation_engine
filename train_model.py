@@ -31,8 +31,8 @@ os.makedirs('embeddings', exist_ok=True)
 # ---------------------------
 # Step 2 - Load Datasets
 # ---------------------------
-LABOUR_DATA_PATH = 'data/Labour_Expanded_fixed.xlsx'
-EQUIP_DATA_PATH  = 'data/Equipment_Final_fixed.xlsx'
+LABOUR_DATA_PATH = 'data/Labour_Expanded_clean_generated.xlsx'
+EQUIP_DATA_PATH  = 'data/Equipment_Final_clean_generated.xlsx'
 
 print("📥 Reading labour dataset from:", LABOUR_DATA_PATH)
 DF_labour = pd.read_excel(LABOUR_DATA_PATH)
