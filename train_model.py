@@ -92,8 +92,10 @@ DF_labour['request_text'] = (
     DF_labour['Location']
 )
 
-# Request-style text for EQUIPMENT (aligned to same idea: crop + season + location-ish)
+# ⚠️ IMPORTANT FIX:
+# Request-style text for EQUIPMENT – now includes Equipment_Type as well
 DF_equip['request_text'] = (
+    DF_equip['Equipment_Type'] + ' ' +            # <-- added
     DF_equip['For_Crop'] + ' ' +
     DF_equip['Season'] + ' ' +
     DF_equip['Nearest_Major_District'] + ' ' +
@@ -107,7 +109,7 @@ DF_labour['Labour_Type_collapsed'] = DF_labour['Labour_Type'].apply(
     lambda x: x if x not in rare else 'other'
 )
 
-labour_label_col   = 'Labour_Type_collapsed'
+labour_label_col    = 'Labour_Type_collapsed'
 equipment_label_col = 'Equipment_Type'
 
 print("✅ Feature Engineering Done")
